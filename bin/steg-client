@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'steg-client'
+
+options = {}
+option_parser = OptionParser.new do |opts|
+  opts.on("-p PORT", "Port where the steg-client proxy will listen to.") do |port|
+    options[:port] = port
+  end
+  opts.on("-m MESSAGE", "Hidden message that will be sent to the server") do |message|
+    options[:message] = message
+  end
+  opts.on("-f FILE", "Send the contents of the text file to the server") do |file|
+    options[:file] = file
+  end
+end
+
+option_parser.parse!
+puts options.inspect
+
+proxy = Stegclient::Server.new(options[:port], options[:message])
