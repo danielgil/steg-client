@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://www.naildrivin5.com/todo'
   s.summary     = %q{Client component of the HTTP Steganography project}
   s.description = %q{}
-  s.files       = ['bin/steg-client']
+  s.files       = ['Rakefile', '{bin,lib,test}/**/*', 'README*', 'LICENSE' ]
   s.executables = ['steg-client']
   s.add_dependency('gli')
 end

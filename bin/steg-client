@@ -5,18 +5,33 @@ require 'steg-client'
 
 options = {}
 option_parser = OptionParser.new do |opts|
-  opts.on("-p PORT", "Port where the steg-client proxy will listen to.") do |port|
+  opts.on('-p PORT', 'Port where the steg-client proxy will listen to.') do |port|
     options[:port] = port
   end
-  opts.on("-m MESSAGE", "Hidden message that will be sent to the server") do |message|
+  opts.on('-m MESSAGE', 'Hidden message that will be sent to the server') do |message|
     options[:message] = message
   end
-  opts.on("-f FILE", "Send the contents of the text file to the server") do |file|
+  opts.on('-f FILE', 'Send the contents of the text file to the server') do |file|
     options[:file] = file
   end
+  opts.on('-i', '--interactive', 'Interactive mode, messages are read from stdin') do
+    options[:interactive] = true
+  end
+  opts.on('-c CONFIGFILE', 'Use this configuration file instead of the default') do |config|
+    options[:config] = config
+  end
+  opts.on('-v', '--verbose', 'Interactive mode, messages are read from stdin') do
+    options[:verbose] = true
+  end
+
 end
 
 option_parser.parse!
+
+validator = Stegclient::ParameterValidator.new(options)
+validator.validate
+
+
 puts options.inspect
 
 proxy = Stegclient::Server.new(options[:port], options[:message])
