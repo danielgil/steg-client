@@ -2,12 +2,31 @@
 
 require 'optparse'
 require 'steg-client'
+require 'thread'
 
-options = {}
+# Default values
+options = {
+    :port               => '10001',
+    :knockcode          => 'knock',
+    :inputmethod        => 'Header',
+    :inputmethodconfig  => 'Accept-Encoding',
+    :outputmethod       => 'Header',
+    :outputmethodconfig => 'X-Powered-By',
+    :verbose            => false,
+}
+
+# Load the configuration file
+CONFIG_FILE = File.join(ENV['HOME'],'.stegclient.rc.yaml')
+if File.file?(CONFIG_FILE) and File.readable?(CONFIG_FILE)
+  config_options = YAML.load_file(CONFIG_FILE)
+  options.merge!(config_options)
+else
+  File.open(CONFIG_FILE,'w') { |file| YAML::dump(options,file) }
+  STDERR.puts "Initialized configuration file in #{CONFIG_FILE}"
+end
+
+# Parse the command line arguments
 option_parser = OptionParser.new do |opts|
-  opts.on('-p PORT', 'Port where the steg-client proxy will listen to.') do |port|
-    options[:port] = port
-  end
   opts.on('-m MESSAGE', 'Hidden message that will be sent to the server') do |message|
     options[:message] = message
   end
@@ -17,10 +36,22 @@ option_parser = OptionParser.new do |opts|
   opts.on('-i', '--interactive', 'Interactive mode, messages are read from stdin') do
     options[:interactive] = true
   end
-  opts.on('-c CONFIGFILE', 'Use this configuration file instead of the default') do |config|
-    options[:config] = config
+  opts.on('-p PORT', 'Port where the steg-client proxy will listen to.') do |port|
+    options[:port] = port
   end
-  opts.on('-v', '--verbose', 'Interactive mode, messages are read from stdin') do
+  opts.on('-x', '--input-method', 'Steganography method for input messages') do
+    options[:interactive] = true
+  end
+  opts.on('-y', '--input-method-config', 'Steganography method configuration for input messages') do
+    options[:interactive] = true
+  end
+  opts.on('-o', '--output-method', 'Steganography method for output messages') do
+    options[:interactive] = true
+  end
+  opts.on('-u', '--output-method-config', 'Steganography method configuration for output messages') do
+    options[:interactive] = true
+  end
+  opts.on('-v', '--verbose', 'Print debug messages') do
     options[:verbose] = true
   end
 
@@ -32,6 +63,27 @@ validator = Stegclient::ParameterValidator.new(options)
 validator.validate
 
 
-puts options.inspect
+messages = Queue.new
+# If message was specified, we just put it on the queue and are finished
+if options.key?(:message)
+  messages << options[:message]
+end
 
-proxy = Stegclient::Server.new(options[:port], options[:message])
+# If an input file was specified, put the whole content on the queue, line by line
+if options.key?(:file)
+  File.readlines(options[:file]).each do |line|
+    messages << line
+  end
+end
+
+# If interactive mode was specified, we launch a new thread that will ask for user input
+if options.key?(:interactive)
+
+end
+
+puts 'Config parameters: ' + options.inspect if options[:verbose]
+puts 'Message queue before launching server: ' + messages.inspect if options[:verbose]
+
+controller = Stegclient::Controller.new(options, messages)
+
+

@@ -4,11 +4,15 @@ require 'webrick/httpproxy'
 module Stegclient
 
   class Server
-    def initialize(port, message)
+
+    def initialize(port, encodedinput, output)
+        @inputqueue = encodedinput
+        @outputqueue = output
 
         # Called before each request is sent to the server
         request_handler = proc do |req, res|
           puts req.request_line, req.raw_header
+
         end
 
         # Called after the response is received but before sending it to the browser
@@ -22,14 +26,13 @@ module Stegclient
             :RequestCallback => request_handler,
             :ProxyContentHandler => response_handler
         )
-
-        # Allow the user to termiate the server cleanly with Control-C
-        trap("INT"){@proxy.shutdown}
-
-        # Start the server
-        @proxy.start
     end
 
+    def start
+      @proxy.start
+    end
+    def stop
+      @proxy.shutdown
+    end
   end
-
 end

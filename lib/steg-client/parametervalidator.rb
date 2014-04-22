@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Stegclient
 
   class ParameterValidator
@@ -6,16 +8,23 @@ module Stegclient
     end
 
     def validate
-      rv = true
-      rv = rv && check_file(@options[:config]) unless @options[:config].nil?
-      rv = rv && check_file(@options[:file]) unless @options[:file].nil?
 
       # Check mutually exclusive arguments
-      #rv = rv &&
-
-      # Check that the config is valid YAML
-
+      rv = 0
+      rv += 1 if @options.key?(:message)
+      rv += 1 if @options.key?(:file)
+      rv += 1 if @options.key?(:interactive)
+      puts "Error: Exactly one input method '-f', '-m' and '-i' must be specified" unless rv == 1
       exit(1) unless rv
+
+      # Check that the input file exists and is readable
+      rv = check_file(@options[:file]) unless @options[:file].nil?
+      exit(1) unless rv
+
+      # Check that the Steganography methods are recognized
+
+      # Check that the Steganography method configuration is valid
+
     end
 
     private
