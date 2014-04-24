@@ -2,3 +2,4 @@
 require 'steg-client/server'
 require 'steg-client/parametervalidator'
 require 'steg-client/controller'
+require 'steg-client/engine'
