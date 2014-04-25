@@ -9,5 +9,5 @@ Gem::Specification.new do |s|
   s.description = %q{}
   s.files       = ['Rakefile', '{bin,lib,test}/**/*', 'README*', 'LICENSE' ]
   s.executables = ['steg-client']
-  #s.add_dependency('aruba')
+  s.add_dependency('colorize')
 end

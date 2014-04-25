@@ -23,14 +23,14 @@ module Stegclient
     # Steganography engine, takes care of encoding/decoding messages and injecting headers
     @engine
 
-    def initialize(options, messages)
+    def initialize(options, messages, responses)
       @options       = options
       @input         = messages
       @encodedinput  = Queue.new
       @output        = Queue.new
-      @decodedoutput = Queue.new
+      @decodedoutput = responses
       @engine        = Stegclient::Engine.new(options)
-      @proxy         = Stegclient::Server.new(options[:port], @encodedinput, @output, @engine, @options[:verbose])
+      @proxy         = Stegclient::Server.new(options[:port], @encodedinput, @output, @engine, @options[:logfile], @options[:verbose])
 
       # Allow the user to terminate the server cleanly with Control-C
       Signal.trap('INT') do
@@ -49,7 +49,6 @@ module Stegclient
         loop do
           message = @input.pop
           @encodedinput << @engine.encode(message)
-          puts "Encoded message = " + @engine.encode(message)
         end
       end
     end

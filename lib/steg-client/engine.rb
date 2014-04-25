@@ -19,11 +19,6 @@ module Stegclient
         return nil
       end
 
-      #steganogram = headers[headername]
-      #steganogram.slice!(/.*#{@options[:knockcode]}/)
-      #size = steganogram.slice!(0..2).to_i
-      #steganogram.slice!(0..size)
-
       # Remove the knockcode
       steganogram.slice!(/#{@options[:knockcode]}/)
 

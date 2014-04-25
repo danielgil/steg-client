@@ -136,6 +136,4 @@ class TestEngine < Test::Unit::TestCase
     # Assert
     assert_equal expected, headers
   end
-
-
 end

@@ -12,6 +12,7 @@ options = {
     :inputmethodconfig  => 'Accept-Encoding',
     :outputmethod       => 'Header',
     :outputmethodconfig => 'X-Powered-By',
+    :logfile            => '/dev/null',
     :verbose            => false,
     :lengthsize         => 3,
     :fieldsize          => 256,
@@ -66,6 +67,7 @@ validator.validate
 
 
 messages = Queue.new
+responses = Queue.new
 # If message was specified, we just put it on the queue and are finished
 if options.key?(:message)
   messages << options[:message]
@@ -80,16 +82,18 @@ end
 
 # If interactive mode was specified, we launch a new thread that will ask for user input
 if options.key?(:interactive)
-
+  console = Stegclient::Console.new(messages, responses)
+  console.start
 end
 
 puts 'Config parameters: ' + options.inspect if options[:verbose]
 puts 'Message queue before launching server: ' + messages.inspect if options[:verbose]
 
-controller = Stegclient::Controller.new(options, messages)
+controller = Stegclient::Controller.new(options, messages, responses)
 controller.start_encoder
 controller.start_decoder
 controller.start_proxy
+
 
 
 

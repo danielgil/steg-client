@@ -5,7 +5,7 @@ module Stegclient
 
   class Server
 
-    def initialize(port, encodedinput, output, engine, verbose)
+    def initialize(port, encodedinput, output, engine, logfile, verbose)
         @inputqueue = encodedinput
         @outputqueue = output
         @engine = engine
@@ -23,11 +23,20 @@ module Stegclient
           @outputqueue << message unless message.nil?
         end
 
+        # Setup the logger
+        if logfile == '/dev/null'
+          logger = logfile
+        else
+          logger = File.open logfile, 'a+'
+        end
+
         # Define the proxy
         @proxy = WEBrick::HTTPProxyServer.new(
-            :Port => port,
-            :RequestCallback => request_handler,
-            :ProxyContentHandler => response_handler
+            :Port                => port,
+            :RequestCallback     => request_handler,
+            :ProxyContentHandler => response_handler,
+            :Logger              => WEBrick::Log.new(logger),
+            :AccessLog           => [],
         )
     end
 
