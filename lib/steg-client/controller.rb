@@ -30,7 +30,7 @@ module Stegclient
       @output        = Queue.new
       @decodedoutput = Queue.new
       @engine        = Stegclient::Engine.new(options)
-      @proxy         = Stegclient::Server.new(options[:port], @encodedinput, @output, @engine)
+      @proxy         = Stegclient::Server.new(options[:port], @encodedinput, @output, @engine, @options[:verbose])
 
       # Allow the user to terminate the server cleanly with Control-C
       Signal.trap('INT') do
@@ -39,26 +39,25 @@ module Stegclient
       end
     end
 
-    def startProxy
+    def start_proxy
       @proxy.start
     end
 
-    def startEncoder
+    def start_encoder
       puts 'Starting Encoder thread' if @options[:verbose]
       @encoder = Thread.new do
         loop do
-          puts "Encoding..."
           message = @input.pop
           @encodedinput << @engine.encode(message)
+          puts "Encoded message = " + @engine.encode(message)
         end
       end
     end
 
-    def startDecoder
+    def start_decoder
       puts 'Starting Decoder thread' if @options[:verbose]
       @decoder = Thread.new do
         loop do
-          puts "Decoding..."
           message = @output.pop
           @decodedoutput << @engine.decode(message)
         end

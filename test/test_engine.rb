@@ -105,7 +105,36 @@ class TestEngine < Test::Unit::TestCase
   end
 
   def test_inject_header
+    # Setup
+    options = {
+        :port               => '10001',
+        :knockcode          => 'knock',
+        :inputmethod       => 'Header',
+        :inputmethodconfig => 'Accept-Encoding',
+        :lengthsize         => 3,
+        :fieldsize          => 256,
+    }
+    headers = {
+        'user-agent'        => ['curl/7.32.0'],
+        'host'              => ['localhost'],
+        'accept-encoding'   => ['gzip, deflate'],
+        'proxy-connection'  => ['Keep-Alive'],
+    }
+    steganogram = 'knock024Spiddy is not bad though'
 
+    expected = {
+        'user-agent'        => ['curl/7.32.0'],
+        'host'              => ['localhost'],
+        'accept-encoding'   => ['gzip, deflateknock024Spiddy is not bad though'],
+        'proxy-connection'  => ['Keep-Alive'],
+    }
+    engine = Stegclient::Engine.new(options)
+
+    # Act
+    engine.inject(steganogram, headers)
+
+    # Assert
+    assert_equal expected, headers
   end
 
 

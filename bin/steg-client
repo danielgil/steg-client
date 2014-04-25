@@ -87,9 +87,9 @@ puts 'Config parameters: ' + options.inspect if options[:verbose]
 puts 'Message queue before launching server: ' + messages.inspect if options[:verbose]
 
 controller = Stegclient::Controller.new(options, messages)
-controller.startEncoder
-controller.startDecoder
-controller.startProxy
+controller.start_encoder
+controller.start_decoder
+controller.start_proxy
 
 
 

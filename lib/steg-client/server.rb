@@ -5,22 +5,22 @@ module Stegclient
 
   class Server
 
-    def initialize(port, encodedinput, output, engine)
+    def initialize(port, encodedinput, output, engine, verbose)
         @inputqueue = encodedinput
         @outputqueue = output
         @engine = engine
 
         # Called before each request is sent to the server
         request_handler = proc do |req, res|
-          puts req.request_line, req.raw_header
-          output << "ASDF"
-          @engine.inject(@outputqueue.pop, req.raw_header)
+          puts req.request_line, req.raw_header if verbose
+          @engine.inject(@inputqueue.pop, req.header) unless @inputqueue.empty?
         end
 
         # Called after the response is received but before sending it to the browser
         response_handler = proc do |req, res|
-          puts res.header,  res.body
-          @inputqueue << @engine.extract(res.header)
+          puts res.header,  res.body  if verbose
+          message = @engine.extract(res.header)
+          @outputqueue << message unless message.nil?
         end
 
         # Define the proxy

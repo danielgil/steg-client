@@ -21,6 +21,9 @@ module Stegclient
       rv = check_file(@options[:file]) unless @options[:file].nil?
       exit(1) unless rv
 
+      # Convert to string all fields that might have an integer value, e.g. knockcode 123
+      type_check
+
       # Check that the Steganography methods are recognized
 
       # Check that the Steganography method configuration is valid
@@ -41,6 +44,16 @@ module Stegclient
         rv = false
       end
       rv
+    end
+
+    def type_check
+      @options[:knockcode]          = @options[:knockcode].to_s
+      @options[:inputmethod]        = @options[:inputmethod].to_s
+      @options[:inputmethodconfig]  = @options[:inputmethodconfig].to_s
+      @options[:outputmethod]       = @options[:outputmethod].to_s
+      @options[:outputmethodconfig] = @options[:outputmethodconfig].to_s
+      @options[:message]            = @options[:message].to_s if @options.key?(:message)
+
     end
 
   end
