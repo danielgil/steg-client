@@ -43,16 +43,16 @@ option_parser = OptionParser.new do |opts|
     options[:port] = port
   end
   opts.on('-x', '--input-method', 'Steganography method for input messages') do
-    options[:interactive] = true
+    options[:inputmethod] = true
   end
   opts.on('-y', '--input-method-config', 'Steganography method configuration for input messages') do
-    options[:interactive] = true
+    options[:inputmethodconfig] = true
   end
   opts.on('-o', '--output-method', 'Steganography method for output messages') do
-    options[:interactive] = true
+    options[:outputmethod] = true
   end
   opts.on('-u', '--output-method-config', 'Steganography method configuration for output messages') do
-    options[:interactive] = true
+    options[:outputmethodconfig] = true
   end
   opts.on('-v', '--verbose', 'Print debug messages') do
     options[:verbose] = true
