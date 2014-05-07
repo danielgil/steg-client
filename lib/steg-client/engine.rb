@@ -3,6 +3,8 @@ module Stegclient
   class Engine
     def initialize(options)
       @options = options
+      # Queue for the 'Present' steganography method
+      @presentqueue = Array.new
     end
 
     # Turns a plain text message into steganograms ready to be sent
@@ -51,6 +53,8 @@ module Stegclient
       case @options[:inputmethod].downcase
         when 'header'
           return inject_header(steganogram, headers)
+        when 'present'
+          return inject_present(steganogram, headers)
         when 'doesntexistyet'
           return 'hahaha'
         else
@@ -100,6 +104,28 @@ module Stegclient
 
     end
 
+    def inject_present(steganogram, headers)
+
+      # If the queue for the present method is empty, split the current steganogram into binary
+      if @presentqueue.empty?
+          steganogram.bytes.each do |number|
+              char = Array.new(8) { |i| number[i] }.reverse!
+              char.each {|bit| @presentqueue.push(bit)}
+          end
+          puts "New steganogram for Present method detected: '#{steganogram}' splitted into binary '#{@presentqueue}'" if @options[:verbose]
+      end
+
+      # Get the header name from the configuration options
+      headername = @options[:inputmethodconfig].downcase.split[0]
+      headercontent = @options[:inputmethodconfig].downcase.split[1..-1].join(' ')
+
+      # If the first number of @presentqueue is 0, we make sure the header is present. Otherwise, we make sure it's absent.
+      present = @presentqueue.shift
+
+      headers.delete_if {|key, value| key == headername } if present == 0
+      headers[headername] = [headercontent]                 if present == 1
+
+    end
 
   end
 end

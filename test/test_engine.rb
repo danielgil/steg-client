@@ -136,4 +136,62 @@ class TestEngine < Test::Unit::TestCase
     # Assert
     assert_equal expected, headers
   end
+
+  def test_inject_present
+    # Setup
+    options = {
+        :port               => '10001',
+        :knockcode          => 'knock',
+        :inputmethod       => 'Present',
+        :inputmethodconfig => 'Accept-Encoding gzip, deflate',
+        :lengthsize         => 3,
+        :fieldsize          => 256,
+    }
+    headers = {
+        'user-agent'        => ['curl/7.32.0'],
+        'host'              => ['localhost'],
+        'accept-encoding'   => ['gzip, deflate'],
+        'proxy-connection'  => ['Keep-Alive'],
+    }
+
+    header_present = {
+        'user-agent'        => ['curl/7.32.0'],
+        'host'              => ['localhost'],
+        'accept-encoding'   => ['gzip, deflate'],
+        'proxy-connection'  => ['Keep-Alive'],
+    }
+
+    header_absent = {
+        'user-agent'        => ['curl/7.32.0'],
+        'host'              => ['localhost'],
+        'proxy-connection'  => ['Keep-Alive'],
+    }
+
+    steganogram = 'knock016ls -lah 2>/dev &'
+    expected = Array.new
+    # Transform steganogram into bit array
+    whatsy = Array.new
+    steganogram.bytes.each do |number|
+      char = Array.new(8) { |i| number[i] }.reverse!
+      # Build the expected result. It's an array of hashes, where every element is
+      # a 'headers' hash
+      char.each do |bit|
+        expected.push header_absent if bit.equal?(0)
+        expected.push header_present if bit.equal?(1)
+      end
+    end
+
+    engine = Stegclient::Engine.new(options)
+
+    # Act
+    result = Array.new
+    (steganogram.length*8).times do
+      # Since every char will be converted to 8 bits, we send length*8 requests
+      engine.inject(steganogram, headers)
+      result.push headers.clone
+    end
+
+    # Assert
+    assert_equal expected, result
+  end
 end
