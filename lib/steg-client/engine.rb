@@ -3,8 +3,11 @@ module Stegclient
   class Engine
     def initialize(options)
       @options = options
-      # Queue for the 'Present' steganography method
+      # The 'Present' steganography method needs persistent data structures across multiple requests
       @presentqueue = Array.new
+      @extractbuffer = Array.new
+      @knockcodechar = Array.new
+      @lengthfield = 0
     end
 
     # Turns a plain text message into steganograms ready to be sent
@@ -40,6 +43,8 @@ module Stegclient
       case @options[:outputmethod].downcase
         when 'header'
           return extract_header(headers)
+        when 'present'
+          return extract_present(headers)
         when 'doesntexistyet'
           return 'hahaha'
         else
@@ -127,5 +132,48 @@ module Stegclient
 
     end
 
+    def extract_present(headers)
+
+      # Extract the bit from the headers and push it into the bit buffer
+      headername = @options[:outputmethodconfig].downcase
+      @knockcodechar.push(1) if headers.key?(headername)
+      @knockcodechar.push(0) unless headers.key?(headername)
+
+      # Once we have 8 bits, we can convert it to a char and push it into the extractbuffer
+      if @knockcodechar.length == 8
+        char = @knockcodechar.join
+        @extractbuffer << Array(char.to_i(2)).pack('c')
+        @knockcodechar = []
+      else
+        return nil
+      end
+
+      # Wait until we find the knockcode
+      if @extractbuffer.join.length <= @options[:knockcode].length
+        # If the buffer does not start with a partial part of the knockcode, reset it
+        unless @options[:knockcode] =~ /^#{@extractbuffer.join}/
+          @extractbuffer = []
+        end
+        return nil
+      end
+
+      # Wait until we find knockcode + lengthfield
+      if  @extractbuffer.join.length == @options[:knockcode].length + @options[:lengthsize]
+         @lengthfield = @extractbuffer.join[-@options[:lengthsize]..-1].to_i
+         return nil
+      end
+
+      # Wait until we find knockcode + lengthfield + data
+      if  @extractbuffer.join.length == @options[:knockcode].length + @options[:lengthsize] + @lengthfield
+         return @extractbuffer.join
+      end
+
+      # By default, return nil
+      nil
+    end
+
   end
+
+
+
 end

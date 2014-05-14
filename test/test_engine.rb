@@ -1,5 +1,6 @@
 gem 'test-unit'
 require 'test/unit'
+require 'steg-client/hash'
 require 'steg-client/engine'
 
 class TestEngine < Test::Unit::TestCase
@@ -170,7 +171,6 @@ class TestEngine < Test::Unit::TestCase
     steganogram = 'knock016ls -lah 2>/dev &'
     expected = Array.new
     # Transform steganogram into bit array
-    whatsy = Array.new
     steganogram.bytes.each do |number|
       char = Array.new(8) { |i| number[i] }.reverse!
       # Build the expected result. It's an array of hashes, where every element is
@@ -193,5 +193,53 @@ class TestEngine < Test::Unit::TestCase
 
     # Assert
     assert_equal expected, result
+  end
+
+  def test_extract_present
+    # Setup
+    options = {
+        :port               => '10001',
+        :knockcode          => 'knock',
+        :outputmethod       => 'Present',
+        :outputmethodconfig => 'X-Powered-By',
+        :lengthsize         => 3,
+        :fieldsize          => 256,
+    }
+    headers_present = {
+        'date'              => 'Thu, 24 Apr 2014 15:08:14 GMT',
+        'server'            => 'Apache/2.4.9 (Fedora)',
+        'x-powered-by'      => 'PHP/5.4.0',
+        'connection'        => 'close',
+    }
+    headers_absent = {
+        'date'              => 'Thu, 24 Apr 2014 15:08:14 GMT',
+        'server'            => 'Apache/2.4.9 (Fedora)',
+        'connection'        => 'close',
+    }
+
+    engine = Stegclient::Engine.new(options)
+    expected = 'knock011some result'
+    input_array = Array.new
+
+    # Convert expected into a binary array, e.g. [0, 1, 1, 0, ...], and add some junk in front and after
+    real_input = 'akno2' + expected + 'what'
+    real_input.bytes.each do |number|
+      char = Array.new(8) { |i| number[i] }.reverse!
+      # Build an array with the headers of all the requests that will be sent, headers_absent when 0 and headers_present when 1
+      char.each do |bit|
+        input_array.push headers_absent if bit.equal?(0)
+        input_array.push headers_present if bit.equal?(1)
+      end
+    end
+
+    # Act
+    result = nil
+    input_array.each do |headers|
+      result = engine.extract(headers)
+      # Assert
+      assert_equal expected, result unless result.nil?
+    end
+
+
   end
 end
