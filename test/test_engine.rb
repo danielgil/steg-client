@@ -1,6 +1,5 @@
 gem 'test-unit'
 require 'test/unit'
-require 'steg-client/hash'
 require 'steg-client/engine'
 
 class TestEngine < Test::Unit::TestCase

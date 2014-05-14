@@ -112,7 +112,7 @@ module Stegclient
     def inject_present(steganogram, headers)
 
       # If the queue for the present method is empty, split the current steganogram into binary
-      if @presentqueue.empty?
+      if @presentqueue.empty? and not steganogram.nil?
           steganogram.bytes.each do |number|
               char = Array.new(8) { |i| number[i] }.reverse!
               char.each {|bit| @presentqueue.push(bit)}
@@ -120,16 +120,18 @@ module Stegclient
           puts "New steganogram for Present method detected: '#{steganogram}' splitted into binary '#{@presentqueue}'" if @options[:verbose]
       end
 
-      # Get the header name from the configuration options
-      headername = @options[:inputmethodconfig].downcase.split[0]
-      headercontent = @options[:inputmethodconfig].downcase.split[1..-1].join(' ')
+      # If there are bits in the queue, send them
+      unless @presentqueue.empty?
+        # Get the header name from the configuration options
+        headername = @options[:inputmethodconfig].downcase.split[0]
+        headercontent = @options[:inputmethodconfig].downcase.split[1..-1].join(' ')
 
-      # If the first number of @presentqueue is 0, we make sure the header is present. Otherwise, we make sure it's absent.
-      present = @presentqueue.shift
+        # If the first number of @presentqueue is 0, we make sure the header is present. Otherwise, we make sure it's absent.
+        present = @presentqueue.shift
 
-      headers.delete_if {|key, value| key == headername } if present == 0
-      headers[headername] = [headercontent]                 if present == 1
-
+        headers.delete_if {|key, value| key == headername } if present == 0
+        headers[headername] = [headercontent]               if present == 1
+      end
     end
 
     def extract_present(headers)
