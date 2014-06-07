@@ -13,7 +13,12 @@ module Stegclient
         # Called before each request is sent to the server
         request_handler = proc do |req, res|
           puts req.request_line, req.raw_header if verbose
-          @engine.inject(@inputqueue.pop, req.header)
+          if @inputqueue.empty?
+            @engine.inject(nil, req.header)
+          else
+            @engine.inject(@inputqueue.pop, req.header)
+          end
+
         end
 
         # Called after the response is received but before sending it to the browser

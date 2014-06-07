@@ -100,13 +100,14 @@ module Stegclient
     end
 
     def inject_header(steganogram, headers)
-      # Check if the header is present, and create it empty if it's not
-      headername = @options[:inputmethodconfig].downcase
-      headers[headername] = [''] unless headers.key?(headername)
+      unless stegangoram.nil?
+        # Check if the header is present, and create it empty if it's not
+        headername = @options[:inputmethodconfig].downcase
+        headers[headername] = [''] unless headers.key?(headername)
 
-      # Add the new header
-      headers[headername][0] << steganogram
-
+        # Add the new header
+        headers[headername][0] << steganogram
+      end
     end
 
     def inject_present(steganogram, headers)
@@ -131,6 +132,9 @@ module Stegclient
 
         headers.delete_if {|key, value| key == headername } if present == 0
         headers[headername] = [headercontent]               if present == 1
+
+        puts "Sending 0" if present == 0
+        puts "Sending 1" if present == 1
       end
     end
 
