@@ -20,7 +20,7 @@ module Stegclient
     def decode(steganogram)
       # If it doesn't start with the knockcode, it's invalid
       unless steganogram.start_with?(@options[:knockcode])
-        puts "1 Failed decoding invalid steganogram : '#{steganogram}'" if @options[:verbose]
+        puts "Failed decoding invalid steganogram : '#{steganogram}'" if @options[:verbose]
         return nil
       end
 
@@ -32,7 +32,7 @@ module Stegclient
 
       # Check that the length is correct
       unless steganogram.length == size
-        puts "2 Failed decoding invalid steganogram : '#{steganogram}'" if @options[:verbose]
+        puts "Failed decoding invalid steganogram : '#{steganogram}'" if @options[:verbose]
          return nil
       end
       steganogram
@@ -132,9 +132,6 @@ module Stegclient
 
         headers.delete_if {|key, value| key == headername } if present == 0
         headers[headername] = [headercontent]               if present == 1
-
-        puts "Sending 0" if present == 0
-        puts "Sending 1" if present == 1
       end
     end
 
@@ -146,6 +143,7 @@ module Stegclient
       @knockcodechar.push(0) unless headers.key?(headername)
 
       # Once we have 8 bits, we can convert it to a char and push it into the extractbuffer
+
       if @knockcodechar.length == 8
         char = @knockcodechar.join
         @extractbuffer << Array(char.to_i(2)).pack('c')
@@ -171,7 +169,7 @@ module Stegclient
 
       # Wait until we find knockcode + lengthfield + data
       if  @extractbuffer.join.length == @options[:knockcode].length + @options[:lengthsize] + @lengthfield
-         return @extractbuffer.join
+        return @extractbuffer.join
       end
 
       # By default, return nil
