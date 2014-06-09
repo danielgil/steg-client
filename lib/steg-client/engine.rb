@@ -1,3 +1,4 @@
+require 'symmetric-encryption'
 
 module Stegclient
   class Engine
@@ -8,13 +9,26 @@ module Stegclient
       @extractbuffer = Array.new
       @knockcodechar = Array.new
       @lengthfield = 0
+
+      unless @options[:key].nil?
+        SymmetricEncryption.cipher = SymmetricEncryption::Cipher.new(
+            key:         @options[:key],
+            iv:          @options[:iv],
+            cipher_name: 'aes-128-cbc'
+        )
+      end
+
     end
 
     # Turns a plain text message into steganograms ready to be sent
     def encode(message)
 
       # If the encryption key is set, encrypt the message
-      encrypt(message) unless @options[:key].nil?
+      if @options[:key].nil?
+        message = message
+      else
+        message = encrypt(message)
+      end
 
       size = message.length.to_s.rjust(@options[:lengthsize],'0') #Padded with 0
       @options[:knockcode] + size + message
@@ -39,8 +53,13 @@ module Stegclient
         puts "Invalid steganogram length : '#{steganogram}'" if @options[:verbose]
         return nil
       end
+
       # If the encryption key is set, decrypt the message
-      decrypt(steganogram) unless @options[:key].nil?
+      if @options[:key].nil?
+        steganogram = steganogram
+      else
+        steganogram = decrypt(steganogram)
+      end
 
       # Return the steganogram
       steganogram
@@ -186,13 +205,18 @@ module Stegclient
 
     # Encrypt the message using symmetric encryption
     def encrypt(message)
-      puts "Encrypting '#{message}'"
-      message
+      encrypted = SymmetricEncryption.encrypt(message).chomp
+      puts "Message '#{message}' encrypted into '#{encrypted}'" if @options[:verbose]
+
+      encrypted
     end
 
     # Decrypt the message using symmetric encryption
     def decrypt(message)
-      puts "Decrypting '#{message}'"
+      decrypted = SymmetricEncryption.decrypt(message)
+      puts "Message '#{message}' decrypted into '#{decrypted}'" if @options[:verbose]
+
+      decrypted
     end
 
   end

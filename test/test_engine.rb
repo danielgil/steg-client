@@ -250,14 +250,15 @@ class TestEngine < Test::Unit::TestCase
   def test_encrypt
     # Setup
     options = {
-        :key          => 'somekey',
         :knockcode    => 'knock',
         :lengthsize         => 3,
         :fieldsize          => 256,
+        :key                => '1234567890ABCDEF1234567890ABCDEF',
+        :iv                 => '1234567890ABCDEF'
     }
     engine = Stegclient::Engine.new(options)
     message = 'mazinger rocks'
-    expected = 'knock014mazinger rocks'
+    expected = 'knock024Ltjc6+GbY7ugSCwkzrhcmA=='
 
     # Act
     steganogram = engine.encode(message)
@@ -273,10 +274,11 @@ class TestEngine < Test::Unit::TestCase
         :knockcode          => 'knock',
         :lengthsize         => 3,
         :fieldsize          => 256,
-        :key                => 'somekey'
+        :key                => '1234567890ABCDEF1234567890ABCDEF',
+        :iv                 => '1234567890ABCDEF'
     }
     engine = Stegclient::Engine.new(options)
-    steganogram = 'knock014mazinger rocks'
+    steganogram = 'knock024Ltjc6+GbY7ugSCwkzrhcmA=='
     expected = 'mazinger rocks'
 
     #Act

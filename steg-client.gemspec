@@ -10,4 +10,5 @@ Gem::Specification.new do |s|
   s.files       = Dir['Rakefile', '{bin,lib,test}/**/*', 'README*', 'LICENSE' ]
   s.executables = ['steg-client']
   s.add_dependency('colorize')
+  s.add_dependency('symmetric-encryption')
 end
