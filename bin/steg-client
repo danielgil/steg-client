@@ -13,6 +13,7 @@ options = {
     :outputmethod       => 'Header',
     :outputmethodconfig => 'X-Powered-By',
     :logfile            => '/dev/null',
+    :key                => 'somekey',
     :verbose            => false,
     :lengthsize         => 3,
     :fieldsize          => 256,
@@ -42,17 +43,20 @@ option_parser = OptionParser.new do |opts|
   opts.on('-p PORT', 'Port where the steg-client proxy will listen to.') do |port|
     options[:port] = port
   end
-  opts.on('-x', '--input-method', 'Steganography method for input messages') do
-    options[:inputmethod] = true
+  opts.on('-k KEY', 'Key for symmetric encryption') do |key|
+    options[:key] = key
   end
-  opts.on('-y', '--input-method-config', 'Steganography method configuration for input messages') do
-    options[:inputmethodconfig] = true
+  opts.on('-x', '--input-method INPUTMETHOD', 'Steganography method for input messages') do |inputmethod|
+    options[:inputmethod] = inputmethod
   end
-  opts.on('-o', '--output-method', 'Steganography method for output messages') do
-    options[:outputmethod] = true
+  opts.on('-y', '--input-method-config INPUTMETHODCONFIG', 'Steganography method configuration for input messages') do |inputmethodconfig|
+    options[:inputmethodconfig] = inputmethodconfig
   end
-  opts.on('-u', '--output-method-config', 'Steganography method configuration for output messages') do
-    options[:outputmethodconfig] = true
+  opts.on('-o', '--output-method OUTPUTMETHOD', 'Steganography method for output messages') do |outputmethod|
+    options[:outputmethod] = outputmethod
+  end
+  opts.on('-u', '--output-method-config OUTPUTMETHODCONFIG', 'Steganography method configuration for output messages') do |outputmethodconfig|
+    options[:outputmethodconfig] = outputmethodconfig
   end
   opts.on('-v', '--verbose', 'Print debug messages') do
     options[:verbose] = true

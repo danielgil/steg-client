@@ -12,6 +12,10 @@ module Stegclient
 
     # Turns a plain text message into steganograms ready to be sent
     def encode(message)
+
+      # If the encryption key is set, encrypt the message
+      encrypt(message) unless @options[:key].nil?
+
       size = message.length.to_s.rjust(@options[:lengthsize],'0') #Padded with 0
       @options[:knockcode] + size + message
     end
@@ -32,9 +36,13 @@ module Stegclient
 
       # Check that the length is correct
       unless steganogram.length == size
-        puts "Failed decoding invalid steganogram : '#{steganogram}'" if @options[:verbose]
-         return nil
+        puts "Invalid steganogram length : '#{steganogram}'" if @options[:verbose]
+        return nil
       end
+      # If the encryption key is set, decrypt the message
+      decrypt(steganogram) unless @options[:key].nil?
+
+      # Return the steganogram
       steganogram
     end
 
@@ -100,7 +108,7 @@ module Stegclient
     end
 
     def inject_header(steganogram, headers)
-      unless stegangoram.nil?
+      unless steganogram.nil?
         # Check if the header is present, and create it empty if it's not
         headername = @options[:inputmethodconfig].downcase
         headers[headername] = [''] unless headers.key?(headername)
@@ -174,6 +182,17 @@ module Stegclient
 
       # By default, return nil
       nil
+    end
+
+    # Encrypt the message using symmetric encryption
+    def encrypt(message)
+      puts "Encrypting '#{message}'"
+      message
+    end
+
+    # Decrypt the message using symmetric encryption
+    def decrypt(message)
+      puts "Decrypting '#{message}'"
     end
 
   end

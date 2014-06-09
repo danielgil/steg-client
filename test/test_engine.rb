@@ -31,7 +31,8 @@ class TestEngine < Test::Unit::TestCase
         :knockcode          => 'knock',
         :lengthsize         => 3,
         :fieldsize          => 256,
-        :verbose            => true
+        :verbose            => true,
+        :key                => nil
     }
     engine = Stegclient::Engine.new(options)
     steganogram = 'knock020Goku i$ even cooler!'
@@ -50,6 +51,7 @@ class TestEngine < Test::Unit::TestCase
         :knockcode          => 'knock',
         :lengthsize         => 3,
         :fieldsize          => 256,
+        :key                => nil
     }
     engine = Stegclient::Engine.new(options)
     steganogram = 'knock025Goku i$ even cooler!'
@@ -67,6 +69,7 @@ class TestEngine < Test::Unit::TestCase
         :knockcode          => 'knock',
         :lengthsize         => 3,
         :fieldsize          => 256,
+        :key                => nil
     }
     engine = Stegclient::Engine.new(options)
     steganogram = '020Goku i$ even cooler!'
@@ -87,6 +90,7 @@ class TestEngine < Test::Unit::TestCase
         :outputmethodconfig => 'X-Powered-By',
         :lengthsize         => 3,
         :fieldsize          => 256,
+        :key                => nil
     }
     headers = {
         'date'              => 'Thu, 24 Apr 2014 15:08:14 GMT',
@@ -113,6 +117,7 @@ class TestEngine < Test::Unit::TestCase
         :inputmethodconfig => 'Accept-Encoding',
         :lengthsize         => 3,
         :fieldsize          => 256,
+        :key                => nil
     }
     headers = {
         'user-agent'        => ['curl/7.32.0'],
@@ -146,6 +151,7 @@ class TestEngine < Test::Unit::TestCase
         :inputmethodconfig => 'Accept-Encoding gzip, deflate',
         :lengthsize         => 3,
         :fieldsize          => 256,
+        :key                => nil
     }
     headers = {
         'user-agent'        => ['curl/7.32.0'],
@@ -203,6 +209,7 @@ class TestEngine < Test::Unit::TestCase
         :outputmethodconfig => 'X-Powered-By',
         :lengthsize         => 3,
         :fieldsize          => 256,
+        :key                => nil
     }
     headers_present = {
         'date'              => 'Thu, 24 Apr 2014 15:08:14 GMT',
@@ -238,7 +245,46 @@ class TestEngine < Test::Unit::TestCase
       # Assert
       assert_equal expected, result unless result.nil?
     end
+  end
 
+  def test_encrypt
+    # Setup
+    options = {
+        :key          => 'somekey',
+        :knockcode    => 'knock',
+        :lengthsize         => 3,
+        :fieldsize          => 256,
+    }
+    engine = Stegclient::Engine.new(options)
+    message = 'mazinger rocks'
+    expected = 'knock014mazinger rocks'
+
+    # Act
+    steganogram = engine.encode(message)
+
+    # Assert
+    assert_equal expected, steganogram
 
   end
+
+  def test_decrypt
+    # Setup
+    options = {
+        :knockcode          => 'knock',
+        :lengthsize         => 3,
+        :fieldsize          => 256,
+        :key                => 'somekey'
+    }
+    engine = Stegclient::Engine.new(options)
+    steganogram = 'knock014mazinger rocks'
+    expected = 'mazinger rocks'
+
+    #Act
+    message = engine.decode(steganogram)
+
+    #Assert
+    assert_equal expected, message
+  end
+
+
 end
